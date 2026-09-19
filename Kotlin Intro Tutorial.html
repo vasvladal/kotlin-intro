@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kotlin Intro — подробный туториал по файлам section2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            background: #f8fafc;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            line-height: 1.6;
+            color: #0b1b2f;
+            padding: 0;
+        }
+        .layout {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            gap: 2rem;
+            padding: 2rem 1.5rem;
+        }
+        .content {
+            flex: 1;
+            min-width: 0;
+        }
+        .sidebar {
+            width: 280px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 1.5rem;
+            align-self: flex-start;
+            max-height: calc(100vh - 3rem);
+            overflow-y: auto;
+            background: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 6px 20px rgba(0, 20, 40, 0.07);
+            border: 1px solid #e2eaf3;
+            padding: 1.4rem 1.2rem;
+            scrollbar-width: thin;
+        }
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #cddff5;
+            border-radius: 10px;
+        }
+        .sidebar h2 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #4b6e8f;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            padding-bottom: 0.6rem;
+            border-bottom: 2px solid #eef3fa;
+        }
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+        .nav-list a {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            text-decoration: none;
+            color: #1e3c5c;
+            font-size: 0.88rem;
+            padding: 0.42rem 0.6rem;
+            border-radius: 10px;
+            transition: 0.12s ease;
+            line-height: 1.3;
+        }
+        .nav-list a:hover {
+            background: #eef4ff;
+            color: #1d4ed8;
+        }
+        .nav-list a.active {
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-weight: 600;
+        }
+        .nav-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            background: #eef4ff;
+            color: #3b82f6;
+            border-radius: 6px;
+            padding: 0.1rem 0.35rem;
+            min-width: 1.8rem;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .nav-list a:hover .nav-num,
+        .nav-list a.active .nav-num {
+            background: #c7ddff;
+            color: #1d4ed8;
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            color: #0f2b46;
+            border-left: 6px solid #3b82f6;
+            padding-left: 1.2rem;
+        }
+        .subtitle {
+            color: #2c4b6e;
+            margin-bottom: 2.2rem;
+            font-size: 1.05rem;
+            padding-left: 1.8rem;
+            font-weight: 400;
+        }
+        .grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.6rem;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(0, 20, 40, 0.06);
+            padding: 1.6rem 1.8rem;
+            transition: 0.15s ease;
+            border: 1px solid #e2eaf3;
+            scroll-margin-top: 1.5rem;
+        }
+        .card:hover {
+            box-shadow: 0 12px 28px rgba(0, 20, 40, 0.1);
+            border-color: #bdd3f0;
+        }
+        .card:target {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px #dbeafe, 0 12px 28px rgba(0, 20, 40, 0.1);
+        }
+        .card-header {
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #eef3fa;
+            padding-bottom: 0.75rem;
+        }
+        .file-name {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            background: #eef4ff;
+            color: #1e4a7a;
+            padding: 0.2rem 1rem;
+            border-radius: 40px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border: 1px solid #cddff5;
+        }
+        .file-title {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: #132c44;
+        }
+        .why {
+            background: #f0f7ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.9rem 1.2rem;
+            border-radius: 12px;
+            margin-bottom: 1.2rem;
+            font-size: 1rem;
+            color: #18395c;
+        }
+        .why strong {
+            color: #0b2b4a;
+            font-weight: 600;
+        }
+        .code-block {
+            background: #0d1c2b;
+            color: #e2eaf8;
+            border-radius: 14px;
+            padding: 1.2rem 1.4rem;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.88rem;
+            line-height: 1.55;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin: 0.8rem 0 0.4rem;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+            tab-size: 4;
+        }
+        .code-block .comment { color: #8ba9c9; font-style: italic; }
+        .code-block .keyword { color: #ffb86b; font-weight: 500; }
+        .code-block .string { color: #b0e57c; }
+        .code-block .func { color: #7dc4ff; }
+        .code-block .number { color: #f9a8a8; }
+        .explain {
+            margin-top: 0.8rem;
+            padding-left: 0.5rem;
+        }
+        .explain ul { list-style: none; }
+        .explain li {
+            margin-bottom: 0.5rem;
+            padding-left: 1.4rem;
+            position: relative;
+        }
+        .explain li::before {
+            content: "▹";
+            color: #3b82f6;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        .badge {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.15rem 0.8rem;
+            border-radius: 30px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        .note {
+            background: #fff9e6;
+            border-left: 4px solid #eab308;
+            padding: 0.9rem 1.2rem;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+            font-size: 0.95rem;
+            color: #5c4a1a;
+        }
+        .footer {
+            margin-top: 3rem;
+            text-align: center;
+            color: #5b7b9c;
+            font-size: 0.9rem;
+            border-top: 1px solid #d5e2f0;
+            padding-top: 1.8rem;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #d5e2f0;
+            margin: 2rem 0;
+        }
+        .to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #3b82f6;
+            color: #fff;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 1.3rem;
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.25s ease;
+            z-index: 100;
+        }
+        .to-top.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .to-top:hover {
+            background: #1d4ed8;
+            transform: translateY(-3px);
+        }
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            background: #0f2b46;
+            color: #fff;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(15, 43, 70, 0.35);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        @media (max-width: 960px) {
+            .layout {
+                flex-direction: column;
+                padding: 1.2rem;
+                gap: 1rem;
+            }
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                max-height: 100vh;
+                width: 300px;
+                border-radius: 0 18px 18px 0;
+                transform: translateX(-105%);
+                transition: transform 0.25s ease;
+                z-index: 200;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .menu-toggle { display: flex; }
+            .to-top { right: 1.2rem; bottom: 1.2rem; }
+            .menu-toggle { left: 1.2rem; bottom: 1.2rem; }
+            h1 { font-size: 1.7rem; }
+            .card { padding: 1.2rem; }
+            .file-title { font-size: 1.15rem; }
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 25, 45, 0.45);
+            z-index: 150;
+            backdrop-filter: blur(2px);
+        }
+        .overlay.open { display: block; }
+    </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay"></div>
+<button class="menu-toggle" id="menuToggle" aria-label="Открыть навигацию">☰</button>
+
+<div class="layout">
+
+    <aside class="sidebar" id="sidebar">
+        <h2>Содержание</h2>
+        <ul class="nav-list">
+            <li><a href="#file-01"><span class="nav-num">01</span> Hello World</a></li>
+            <li><a href="#file-02"><span class="nav-num">02</span> Комментарии</a></li>
+            <li><a href="#file-03"><span class="nav-num">03</span> Переменные</a></li>
+            <li><a href="#file-04"><span class="nav-num">04</span> Строки</a></li>
+            <li><a href="#file-05"><span class="nav-num">05</span> Упражнение: переменные</a></li>
+            <li><a href="#file-06"><span class="nav-num">06</span> Типы данных</a></li>
+            <li><a href="#file-07"><span class="nav-num">07</span> Преобразования</a></li>
+            <li><a href="#file-08"><span class="nav-num">08</span> Арифметика</a></li>
+            <li><a href="#file-09"><span class="nav-num">09</span> Логические операторы</a></li>
+            <li><a href="#file-10"><span class="nav-num">10</span> Упражнение: логика</a></li>
+            <li><a href="#file-11"><span class="nav-num">11</span> Nullability</a></li>
+            <li><a href="#file-12"><span class="nav-num">12</span> Исключения</a></li>
+            <li><a href="#file-13"><span class="nav-num">13</span> Списки</a></li>
+            <li><a href="#file-14"><span class="nav-num">14</span> Упражнение: removeAll</a></li>
+            <li><a href="#file-15"><span class="nav-num">15</span> Множества</a></li>
+            <li><a href="#file-16"><span class="nav-num">16</span> Упражнение: HashSet</a></li>
+            <li><a href="#file-17"><span class="nav-num">17</span> Карты</a></li>
+            <li><a href="#file-18"><span class="nav-num">18</span> Упражнение: Map</a></li>
+            <li><a href="#file-19"><span class="nav-num">19</span> Упражнение: if</a></li>
+            <li><a href="#file-20"><span class="nav-num">20</span> Упражнение: when</a></li>
+            <li><a href="#file-21"><span class="nav-num">21</span> Цикл for</a></li>
+            <li><a href="#file-22"><span class="nav-num">22</span> Упражнение: for</a></li>
+            <li><a href="#file-23"><span class="nav-num">23</span> Цикл while</a></li>
+            <li><a href="#file-24"><span class="nav-num">24</span> Функции</a></li>
+            <li><a href="#file-25"><span class="nav-num">25</span> Ещё функции</a></li>
+            <li><a href="#file-26"><span class="nav-num">26</span> Лямбды</a></li>
+            <li><a href="#file-27"><span class="nav-num">27</span> Классы</a></li>
+            <li><a href="#file-28"><span class="nav-num">28</span> Концепции классов</a></li>
+            <li><a href="#file-29"><span class="nav-num">29</span> Упражнение: Calculator</a></li>
+            <li><a href="#file-30"><span class="nav-num">30</span> Интерфейсы</a></li>
+            <li><a href="#file-31"><span class="nav-num">31</span> Упражнение: Coffee</a></li>
+            <li><a href="#file-32"><span class="nav-num">32</span> Generics</a></li>
+        </ul>
+    </aside>
+
+    <main class="content">
+        <h1>Kotlin Intro: разбор всех файлов section2</h1>
+        <div class="subtitle">От hello world до generics — что, зачем и почему используется в каждом примере</div>
+
+        <div class="grid">
+
+            <!-- 01_hw.kt -->
+            <div class="card" id="file-01">
+                <div class="card-header">
+                    <span class="file-name">01_hw.kt</span>
+                    <span class="file-title">Hello World и аннотация @JvmName</span>
+                    <span class="badge">точка входа</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Первая программа, демонстрирующая минимальный синтаксис Kotlin: функция <code>main</code> и вывод строки. Аннотация <code>@JvmName</code> показывает, как управлять именем JVM-класса, который генерируется для файла.
+                </div>
+                <div class="code-block">
+<span class="comment">// @file:JvmName("HelloWorld") — задаёт имя класса для всего файла</span>
+@file:JvmName("HelloWorld")
+package section2
+
+<span class="keyword">fun</span> <span class="func">main</span>() {
+    <span class="func">print</span>(<span class="string">"Hello world!"</span>)
+}
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li><code>@file:JvmName("HelloWorld")</code> — по умолчанию Kotlin сгенерировал бы класс <code>01_hwKt</code>, но аннотация даёт ему имя <code>HelloWorld</code>. Именно это имя используется в <code>build.gradle.kts</code> как <code>mainClass</code>.</li>
+                        <li><code>fun main()</code> — точка входа в программу. В Kotlin не нужны <code>static</code> или <code>public</code>.</li>
+                        <li><code>print</code> вместо <code>println</code> — вывод без перевода строки.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 02_comments.kt -->
+            <div class="card" id="file-02">
+                <div class="card-header">
+                    <span class="file-name">02_comments.kt</span>
+                    <span class="file-title">Комментарии</span>
+                    <span class="badge">синтаксис</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Показать оба типа комментариев в Kotlin: однострочные <code>//</code> и многострочные <code>/* */</code>. Это базовый инструмент документирования и отладки.
+                </div>
+                <div class="code-block">
+package section2
+
+<span class="comment">// This is a single line comment</span>
+
+<span class="comment">/*
+This is
+a multi-line
+comment.
+*/</span>
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li>Однострочные комментарии работают до конца строки.</li>
+                        <li>Многострочные занимают несколько строк, но в Kotlin не вкладываются друг в друга.</li>
+                        <li>Комментарии не влияют на работу программы — компилятор их игнорирует.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 03_variables.kt -->
+            <div class="card" id="file-03">
+                <div class="card-header">
+                    <span class="file-name">03_variables.kt</span>
+                    <span class="file-title">Изменяемые и неизменяемые переменные</span>
+                    <span class="badge">var / val</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Объяснить разницу между <code>var</code> (изменяемая) и <code>val</code> (только для чтения). Показать правила именования и необходимость объявления до использования.
+                </div>
+                <div class="code-block">
+<span class="keyword">var</span> age = <span class="number">33</span>
+age = <span class="number">30</span>            <span class="comment">// можно менять</span>
+
+<span class="keyword">val</span> color = <span class="string">"red"</span>
+<span class="comment">// color = "blue"  // Ошибка! val нельзя переприсвоить</span>
+
+<span class="comment">/*
+Правила именования:
+- буквы, цифры, подчёркивания
+- начинается с буквы или _
+- не ключевое слово
+- camelCase
+- переменная должна быть объявлена до использования
+*/</span>
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li><code>var</code> — изменяемая ссылка, можно присваивать новое значение.</li>
+                        <li><code>val</code> — неизменяемая ссылка, аналог <code>final</code> в Java.</li>
+                        <li>Kotlin предпочитает <code>val</code> везде, где возможно, для безопасности.</li>
+                        <li>Имена чувствительны к регистру, <code>age</code> и <code>Age</code> — разные переменные.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 04_strings.kt -->
+            <div class="card" id="file-04">
+                <div class="card-header">
+                    <span class="file-name">04_strings.kt</span>
+                    <span class="file-title">Строки, экранирование, шаблоны, функции</span>
+                    <span class="badge">String</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Показать работу со строками: escape-последовательности, интерполяцию через <code>${}</code> (и её краткую форму <code>$varName</code>), конкатенацию и встроенные функции (<code>length</code>, <code>uppercase</code>).
+                </div>
+                <div class="code-block">
+<span class="func">println</span>(<span class="string">"The answer is \"yes\""</span>)   <span class="comment">// экранирование кавычек</span>
+<span class="func">println</span>(<span class="string">"Here is a backslash: \\"</span>)
+
+<span class="keyword">var</span> cat = <span class="string">"Pip"</span>
+<span class="keyword">var</span> cat2 = <span class="string">"Billie"</span>
+<span class="func">println</span>(<span class="string">"My cat's name is ${cat}"</span>)    <span class="comment">// шаблон</span>
+<span class="func">println</span>(<span class="string">"My other cat's name is "</span> + cat2)  <span class="comment">// конкатенация</span>
+
+<span class="func">println</span>(<span class="string">"cat length: ${cat.length}"</span>)
+<span class="func">println</span>(cat2.<span class="func">uppercase</span>())
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li>Внутри строк двойные кавычки и обратный слеш нужно экранировать: <code>\"</code>, <code>\\</code>.</li>
+                        <li><code>${переменная}</code> — интерполяция; для простой переменной фигурные скобки можно опустить: <code>"$cat"</code>.</li>
+                        <li>Но если после переменной идёт буква/цифра — <code>{}</code> обязательны: <code>"${cat}s"</code>.</li>
+                        <li>Строки в Kotlin неизменяемы, но имеют множество полезных методов.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 05_exercise.kt -->
+            <div class="card" id="file-05">
+                <div class="card-header">
+                    <span class="file-name">05_exercise.kt</span>
+                    <span class="file-title">Упражнение: переменные</span>
+                    <span class="badge">практика</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Закрепить материал по переменным: создать <code>var</code>, изменить, вывести, создать <code>val</code>. Самостоятельная работа по материалу 03_variables.kt.
+                </div>
+                <div class="code-block">
+<span class="keyword">var</span> age = <span class="number">33</span>
+age = <span class="number">30</span>
+<span class="keyword">var</span> newAge = age + <span class="number">1</span>
+<span class="func">println</span>(age)
+<span class="func">print</span>(newAge)
+
+<span class="keyword">val</span> color = <span class="string">"red"</span>
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li>Демонстрирует, что <code>val</code> можно объявить без использования — ошибки нет.</li>
+                        <li>Проверяет понимание <code>var</code> vs <code>val</code>.</li>
+                        <li>Обратите внимание на разницу <code>print</code> / <code>println</code> в выводе.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 06_data_types.kt -->
+            <div class="card" id="file-06">
+                <div class="card-header">
+                    <span class="file-name">06_data_types.kt</span>
+                    <span class="file-title">Примитивные типы и числа</span>
+                    <span class="badge">типы</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Познакомить с числовыми типами Kotlin (Byte, Short, Int, Long, Float, Double), показать автоматический вывод типа и явное указание, а также суффиксы <code>L</code> и <code>F</code>.
+                </div>
+                <div class="code-block">
+<span class="keyword">var</span> price = <span class="number">12.99</span>      <span class="comment">// Double</span>
+<span class="keyword">var</span> amount = <span class="number">3</span>          <span class="comment">// Int</span>
+<span class="keyword">val</span> total = price * amount
+
+<span class="func">println</span>(<span class="string">"Price: ${price}, ${price::class.simpleName}"</span>)
+
+<span class="keyword">var</span> dogs: <span class="keyword">Int</span> = <span class="number">10</span>
+<span class="keyword">var</span> atoms: <span class="keyword">Long</span> = <span class="number">1234566</span>
+<span class="keyword">var</span> molecules = <span class="number">7890L</span>    <span class="comment">// Long</span>
+<span class="keyword">var</span> price2 = <span class="number">2.99F</span>       <span class="comment">// Float</span>
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li>Диапазоны: Byte — 8 бит, −128..127; Short — 16 бит, −32768..32767; Int — 32 бита, −2³¹..2³¹−1; Long — 64 бита, −2⁶³..2⁶³−1; Float — 32 бита, ~6–7 значащих цифр; Double — 64 бита, ~15–16 значащих цифр.</li>
+                        <li><code>::class.simpleName</code> — получение имени типа в читаемом виде (без пакета и JVM-обёрток).</li>
+                        <li>Суффиксы <code>L</code> (Long) и <code>F</code> (Float) явно задают тип, иначе компилятор сделает <code>Int</code> или <code>Double</code>.</li>
+                        <li>Kotlin не делает неявных преобразований между числами (см. следующий файл).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 07_conversions.kt -->
+            <div class="card" id="file-07">
+                <div class="card-header">
+                    <span class="file-name">07_conversions.kt</span>
+                    <span class="file-title">Преобразование типов</span>
+                    <span class="badge">toLong(), toInt()</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Показать явные преобразования между числовыми типами и предупредить о возможной потере данных (например, <code>2.99F.toInt()</code> даёт 2).
+                </div>
+                <div class="code-block">
+<span class="keyword">val</span> cats = <span class="number">3</span>
+<span class="keyword">val</span> longCats = cats.<span class="func">toLong</span>()
+
+<span class="keyword">var</span> fl = <span class="number">2.99F</span>
+<span class="keyword">var</span> int = fl.<span class="func">toInt</span>()   <span class="comment">// 2 — дробная часть отбрасывается</span>
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li>Kotlin не делает неявных преобразований между числами (в отличие от Java).</li>
+                        <li>Всегда нужно вызывать <code>toXxx()</code> явно: <code>toLong</code>, <code>toInt</code>, <code>toDouble</code>, <code>toFloat</code>, <code>toByte</code>, <code>toShort</code>.</li>
+                        <li>При сужении типа возможна потеря точности — это осознанное решение программиста.</li>
+                        <li>При расширении типа (<code>Int → Long</code>) потери не происходит.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 08_arithmetic_operations.kt -->
+            <div class="card" id="file-08">
+                <div class="card-header">
+                    <span class="file-name">08_arithmetic_operations.kt</span>
+                    <span class="file-title">Арифметические операции и сложный процент</span>
+                    <span class="badge">практика</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Практический пример с банковским вкладом: сложный процент за 5 лет. Демонстрирует оператор <code>*=</code> и работу с Double.
+                </div>
+                <div class="code-block">
+<span class="keyword">var</span> funds = <span class="number">1000.00</span>
+<span class="keyword">val</span> interest = <span class="number">1.055</span>
+
+funds *= interest   <span class="comment">// funds = funds * interest</span>
+<span class="comment">// ... повторяется 5 раз</span>
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li>Составные операторы присваивания: <code>*=</code>, <code>+=</code>, <code>-=</code>, <code>/=</code>, <code>%=</code>.</li>
+                        <li><code>$${funds}</code> — экранирование знака доллара: первый <code>$</code> выводится как символ, второй — начало интерполяции.</li>
+                        <li>Показывает, как <code>Double</code> накапливает погрешность при многократном умножении.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 09_logical_operators.kt -->
+            <div class="card" id="file-09">
+                <div class="card-header">
+                    <span class="file-name">09_logical_operators.kt</span>
+                    <span class="file-title">Логические операторы</span>
+                    <span class="badge">&&, ||, !</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Базовое знакомство с логическими операторами И, ИЛИ, НЕ. Показывает таблицы истинности в действии.
+                </div>
+                <div class="code-block">
+<span class="keyword">val</span> isTrue = <span class="keyword">true</span>
+<span class="keyword">val</span> isFalse = <span class="keyword">false</span>
+
+<span class="func">println</span>(<span class="string">"AND: ${isTrue && isFalse}"</span>)  <span class="comment">// false</span>
+<span class="func">println</span>(<span class="string">"OR: ${isTrue || isFalse}"</span>)   <span class="comment">// true</span>
+<span class="func">println</span>(<span class="string">"NOT: ${!isTrue}"</span>)            <span class="comment">// false</span>
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li><code>&&</code> — логическое И (ленивое: если первый операнд <code>false</code>, второй не вычисляется).</li>
+                        <li><code>||</code> — логическое ИЛИ (ленивое: если первый <code>true</code>, второй не вычисляется).</li>
+                        <li><code>!</code> — унарное отрицание.</li>
+                        <li>Результат любого логического оператора — <code>Boolean</code>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 10_exercise.kt -->
+            <div class="card" id="file-10">
+                <div class="card-header">
+                    <span class="file-name">10_exercise.kt</span>
+                    <span class="file-title">Упражнение: логические условия для фермы</span>
+                    <span class="badge">практика</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Применить логические операторы для вычисления условий получения финансирования. Проверяет понимание приоритета операторов и скобок.
+                </div>
+                <div class="code-block">
+<span class="keyword">val</span> req1 = numCows <= <span class="number">5</span>
+<span class="keyword">val</span> req2 = numCowsWithMilk > <span class="number">0</span>
+<span class="keyword">val</span> req3 = (<span class="number">1</span> + kids) >= <span class="number">3</span>
+
+<span class="keyword">val</span> getsFunding = (req1 && req2) || req3
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li>Скобки важны для правильной группировки условий.</li>
+                        <li>Операторы сравнения <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code> возвращают <code>Boolean</code>.</li>
+                        <li>Без скобок <code>&&</code> имеет более высокий приоритет, чем <code>||</code>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 11_nullability.kt -->
+            <div class="card" id="file-11">
+                <div class="card-header">
+                    <span class="file-name">11_nullability.kt</span>
+                    <span class="file-title">Null safety: ?, ?., ?:, !!</span>
+                    <span class="badge">null safety</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Одна из ключевых фич Kotlin — безопасная работа с null. Показаны nullable-типы, безопасные вызовы, Elvis-оператор и оператор «утверждения» <code>!!</code>.
+                </div>
+                <div class="code-block">
+<span class="keyword">var</span> name: <span class="keyword">String?</span> = <span class="keyword">null</span>     <span class="comment">// nullable</span>
+<span class="comment">// var otherName: String = null // ошибка компиляции</span>
+
+<span class="keyword">var</span> total = num1?.<span class="func">plus</span>(num2)   <span class="comment">// безопасный вызов</span>
+<span class="keyword">var</span> elvis: <span class="keyword">Int?</span> = num1 ?: <span class="number">5</span>   <span class="comment">// Elvis: 5 если null</span>
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li><code>String?</code> — тип, который может быть <code>null</code>. Без <code>?</code> присвоить null нельзя.</li>
+                        <li><code>?.</code> — вызов метода только если объект не null. Результат тоже nullable.</li>
+                        <li><code>?:</code> — Elvis: вернуть правое значение, если левое null.</li>
+                        <li><code>!!</code> — бросить NPE, если null. Использовать только при полной уверенности.</li>
+                        <li>Для nullable-чисел арифметика недоступна напрямую — нужны методы <code>plus</code>, <code>minus</code> и т.д.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 12_exceptions.kt -->
+            <div class="card" id="file-12">
+                <div class="card-header">
+                    <span class="file-name">12_exceptions.kt</span>
+                    <span class="file-title">Исключения: try/catch/finally и throw</span>
+                    <span class="badge">exceptions</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Научить обрабатывать исключения и создавать собственные. Показать блок <code>finally</code>, который выполняется всегда.
+                </div>
+                <div class="code-block">
+<span class="keyword">try</span> {
+    <span class="func">println</span>(txt.<span class="func">toInt</span>())
+} <span class="keyword">catch</span> (e: <span class="keyword">Exception</span>) {
+    <span class="func">println</span>(<span class="string">"Exception: ${e.message}"</span>)
+} <span class="keyword">finally</span> {
+    <span class="func">println</span>(<span class="string">"finally"</span>)
+}
+
+<span class="keyword">throw</span> <span class="keyword">Exception</span>(<span class="string">"Input is not 123"</span>)
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li><code>try</code> — код, который может выбросить исключение.</li>
+                        <li><code>catch</code> — обработка конкретного типа исключения. <code>e.message</code> даёт текст ошибки.</li>
+                        <li><code>finally</code> — выполняется всегда, даже если было исключение или <code>return</code>.</li>
+                        <li><code>throw</code> — явное выбрасывание исключения.</li>
+                        <li>Порядок блоков: только <code>try</code> + <code>catch</code>, или <code>try</code> + <code>finally</code>, или все три.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 13_lists.kt -->
+            <div class="card" id="file-13">
+                <div class="card-header">
+                    <span class="file-name">13_lists.kt</span>
+                    <span class="file-title">Списки: listOf и arrayListOf</span>
+                    <span class="badge">коллекции</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Познакомить с неизменяемыми списками (<code>listOf</code>) и изменяемыми (<code>arrayListOf</code>). Показать доступ по индексу и основные операции.
+                </div>
+                <div class="code-block">
+<span class="keyword">val</span> months = <span class="func">listOf</span>(<span class="string">"Jan"</span>, <span class="string">"Feb"</span>, <span class="string">"Mar"</span>)
+<span class="func">println</span>(months[<span class="number">0</span>])
+<span class="func">println</span>(months[<span class="number">2</span>])
+<span class="func">println</span>(months.<span class="func">get</span>(<span class="number">2</span>))       <span class="comment">// то же, что months[2]</span>
+<span class="func">println</span>(months.<span class="func">indexOf</span>(<span class="string">"Feb"</span>))
+
+<span class="keyword">val</span> letters = <span class="func">arrayListOf</span>(<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>)
+letters.<span class="func">add</span>(<span class="string">"d"</span>)
+letters.<span class="func">remove</span>(<span class="string">"a"</span>)
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li><code>listOf</code> — неизменяемый список: нельзя добавлять/удалять элементы.</li>
+                        <li><code>arrayListOf</code> — изменяемый, аналог <code>ArrayList</code> в Java.</li>
+                        <li>Доступ по индексу: <code>[]</code> или <code>get()</code> — полностью эквивалентны.</li>
+                        <li><code>indexOf</code> возвращает индекс первого вхождения или −1.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 14_exercise.kt -->
+            <div class="card" id="file-14">
+                <div class="card-header">
+                    <span class="file-name">14_exercise.kt</span>
+                    <span class="file-title">Упражнение: removeAll</span>
+                    <span class="badge">практика</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Практика работы с <code>ArrayList</code>: удаление нескольких элементов одной операцией <code>removeAll</code>.
+                </div>
+                <div class="code-block">
+<span class="keyword">val</span> items = <span class="func">arrayListOf</span>(<span class="string">"laptop"</span>, <span class="string">"mouse"</span>, <span class="string">"pen"</span>, <span class="string">"paper"</span>, <span class="string">"mug"</span>, <span class="string">"phone"</span>)
+<span class="keyword">val</span> removedItems = <span class="func">arrayListOf</span>(<span class="string">"pen"</span>, <span class="string">"paper"</span>, <span class="string">"mug"</span>, <span class="string">"phone"</span>)
+items.<span class="func">removeAll</span>(removedItems)
+
+<span class="func">println</span>(<span class="string">"Remaining Items: ${items}"</span>)
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li><code>removeAll</code> принимает коллекцию и удаляет все совпадения сразу.</li>
+                        <li>Показывает, что <code>ArrayList</code> изменяемый.</li>
+                        <li>В результате останутся только <code>laptop</code> и <code>mouse</code>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 15_sets.kt -->
+            <div class="card" id="file-15">
+                <div class="card-header">
+                    <span class="file-name">15_sets.kt</span>
+                    <span class="file-title">Множества: setOf и hashSetOf</span>
+                    <span class="badge">коллекции</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Объяснить, что множество хранит только уникальные элементы. Показать неизменяемый <code>setOf</code> и изменяемый <code>hashSetOf</code>.
+                </div>
+                <div class="code-block">
+<span class="keyword">val</span> numberSet = <span class="func">setOf</span>(<span class="number">4</span>, <span class="number">2</span>, <span class="number">6</span>, <span class="number">9</span>, <span class="number">5</span>, <span class="number">2</span>)  <span class="comment">// 2 — дубликат</span>
+<span class="func">println</span>(numberSet)
+
+<span class="keyword">val</span> initSet = <span class="func">setOf</span>&lt;<span class="keyword">Int</span>&gt;()   <span class="comment">// пустое множество</span>
+
+<span class="keyword">val</span> hashSet = <span class="func">hashSetOf</span>(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>)
+hashSet.<span class="func">add</span>(<span class="number">10</span>)
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li><code>setOf</code> — неизменяемое множество, дубликаты игнорируются (в примере 2 попадёт один раз).</li>
+                        <li><code>hashSetOf</code> — изменяемое, порядок элементов не гарантирован.</li>
+                        <li>Пустое множество требует явного указания типа: <code>setOf&lt;Int&gt;()</code>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 16_exercise.kt -->
+            <div class="card" id="file-16">
+                <div class="card-header">
+                    <span class="file-name">16_exercise.kt</span>
+                    <span class="file-title">Упражнение: клиенты в HashSet</span>
+                    <span class="badge">практика</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Практика добавления и удаления элементов в <code>HashSet</code>.
+                </div>
+                <div class="code-block">
+<span class="keyword">val</span> customers = <span class="func">hashSetOf</span>&lt;<span class="keyword">String</span>&gt;(
+    <span class="string">"Liam"</span>, <span class="string">"Harry"</span>, <span class="string">"Louis"</span>, <span class="string">"Zayn"</span>
+)
+
+customers.<span class="func">add</span>(<span class="string">"Niall"</span>)
+customers.<span class="func">remove</span>(<span class="string">"Zayn"</span>)
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li>Порядок элементов не сохраняется — вывод может отличаться от порядка добавления.</li>
+                        <li><code>add</code> и <code>remove</code> изменяют множество.</li>
+                        <li>Явное указание <code>&lt;String&gt;</code> помогает компилятору.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 17_map.kt -->
+            <div class="card" id="file-17">
+                <div class="card-header">
+                    <span class="file-name">17_map.kt</span>
+                    <span class="file-title">Карты: mapOf и hashMapOf</span>
+                    <span class="badge">коллекции</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Познакомить с парами «ключ-значение». Неизменяемая <code>mapOf</code> и изменяемая <code>hashMapOf</code>, доступ по ключу через <code>[]</code>.
+                </div>
+                <div class="code-block">
+<span class="keyword">var</span> count = <span class="func">mapOf</span>(<span class="number">1</span> <span class="keyword">to</span> <span class="string">"one"</span>, <span class="number">2</span> <span class="keyword">to</span> <span class="string">"two"</span>, <span class="number">3</span> <span class="keyword">to</span> <span class="string">"three"</span>)
+<span class="func">println</span>(count)
+
+<span class="keyword">var</span> emptyMap = <span class="func">mapOf</span>&lt;<span class="keyword">Int</span>, <span class="keyword">String</span>&gt;()
+
+<span class="keyword">var</span> hashMap = <span class="func">hashMapOf</span>&lt;<span class="keyword">Int</span>, <span class="keyword">String</span>&gt;()
+hashMap[<span class="number">4</span>] = <span class="string">"four"</span>
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li><code>to</code> — инфиксная функция создания <code>Pair</code>, удобный синтаксис для Map.</li>
+                        <li><code>mapOf</code> — неизменяемая карта.</li>
+                        <li><code>hashMapOf</code> — изменяемая, можно добавлять и изменять записи через <code>[]</code>.</li>
+                        <li>Пустая карта требует указания типов ключа и значения.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 18_exercise.kt -->
+            <div class="card" id="file-18">
+                <div class="card-header">
+                    <span class="file-name">18_exercise.kt</span>
+                    <span class="file-title">Упражнение: посещаемость и null-safe доступ к Map</span>
+                    <span class="badge">практика</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Практика <code>HashMap</code> с безопасным извлечением значений через <code>?.</code> и Elvis-оператор, а также проверка наличия ключа <code>containsKey</code>.
+                </div>
+                <div class="code-block">
+<span class="keyword">var</span> attendance = <span class="func">hashMapOf</span>(<span class="string">"23 Sept"</span> <span class="keyword">to</span> <span class="number">2837</span>, <span class="string">"24 Sept"</span> <span class="keyword">to</span> <span class="number">3726</span>, <span class="string">"25 Sept"</span> <span class="keyword">to</span> <span class="number">6253</span>)
+
+attendance[<span class="string">"26 Sept"</span>] = <span class="number">6253</span>
+<span class="keyword">val</span> total: <span class="keyword">Int</span> = attendance.<span class="func">get</span>(<span class="string">"26 Sept"</span>)?.<span class="func">plus</span>(attendance.<span class="func">get</span>(<span class="string">"25 Sept"</span>) ?: <span class="number">0</span>) ?: <span class="number">0</span>
+<span class="func">println</span>(<span class="string">"Attendees for Sept 25-26: $total"</span>)
+<span class="func">println</span>(<span class="string">"Sept 22 attendance available?: ${attendance.containsKey("22 Sept")}"</span>)
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li><code>get()</code> возвращает nullable-значение, если ключа нет.</li>
+                        <li>Цепочка <code>?.</code> и <code>?:</code> безопасно обрабатывает отсутствующие ключи.</li>
+                        <li><code>containsKey</code> возвращает <code>Boolean</code> — есть ли ключ в карте.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 19_if_exercise.kt -->
+            <div class="card" id="file-19">
+                <div class="card-header">
+                    <span class="file-name">19_if_exercise.kt</span>
+                    <span class="file-title">Упражнение: if и вложенные условия</span>
+                    <span class="badge">практика</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Практика условных конструкций <code>if/else</code>, включая вложенные условия и вычисление стоимости завтрака.
+                </div>
+                <div class="code-block">
+<span class="keyword">if</span> (hasEggs) {
+    cost = <span class="number">12</span> * eggPrice
+
+    <span class="keyword">if</span> (hasBacon) {
+        cost += (<span class="number">2</span> * baconPrice)
+    }
+} <span class="keyword">else</span> <span class="func">println</span>(<span class="string">"No eggs!!"</span>)
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li>В Kotlin <code>if</code> — это выражение, оно может возвращать значение.</li>
+                        <li>Вложенные <code>if</code> позволяют строить сложные условия.</li>
+                        <li>Фигурные скобки <code>{}</code> нужны, если в ветке больше одного выражения.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 20_when_exercise.kt -->
+            <div class="card" id="file-20">
+                <div class="card-header">
+                    <span class="file-name">20_when_exercise.kt</span>
+                    <span class="file-title">Упражнение: when по первой букве</span>
+                    <span class="badge">практика</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Показать <code>when</code> как мощную замену <code>switch</code>. Проверка по нескольким значениям через запятую.
+                </div>
+                <div class="code-block">
+<span class="keyword">val</span> firstLetter = name[<span class="number">0</span>].<span class="func">lowercase</span>()
+
+<span class="keyword">when</span> (firstLetter) {
+    <span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span> -> <span class="func">println</span>(<span class="string">"Salutations"</span>)
+    <span class="string">"d"</span>, <span class="string">"e"</span>, <span class="string">"f"</span> -> <span class="func">println</span>(<span class="string">"Ello m8"</span>)
+    <span class="keyword">else</span> -> <span class="func">println</span>(<span class="string">"Oi!"</span>)
+}
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li><code>when</code> проверяет значение по ветвям.</li>
+                        <li>Можно объединять несколько значений через запятую.</li>
+                        <li><code>else</code> — обязателен, если <code>when</code> используется как выражение и не все случаи покрыты.</li>
+                        <li><code>name[0]</code> — доступ к символу строки по индексу.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 21_for.kt -->
+            <div class="card" id="file-21">
+                <div class="card-header">
+                    <span class="file-name">21_for.kt</span>
+                    <span class="file-title">Циклы for: коллекции и диапазоны</span>
+                    <span class="badge">циклы</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Показать два основных вида <code>for</code>: по элементам коллекции и по диапазону <code>1..3</code>.
+                </div>
+                <div class="code-block">
+<span class="keyword">val</span> pets = <span class="func">setOf</span>(<span class="string">"dog"</span>, <span class="string">"cat"</span>, <span class="string">"bird"</span>)
+<span class="keyword">for</span> (p <span class="keyword">in</span> pets) {
+    <span class="func">println</span>(<span class="string">"Hi $p"</span>)
+}
+
+<span class="keyword">for</span> (i <span class="keyword">in</span> <span class="number">1</span> .. <span class="number">3</span>) {
+    <span class="func">println</span>(<span class="string">"Strike $i..."</span>)
+}
+<span class="func">println</span>(<span class="string">"Out!"</span>)
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li><code>for (x in collection)</code> — перебор элементов.</li>
+                        <li><code>1..3</code> — диапазон, включающий оба конца (1, 2, 3).</li>
+                        <li>Дополнительно: <code>until</code> (не включая правый конец), <code>downTo</code> (в обратном порядке), <code>step</code> (шаг).</li>
+                        <li>Переменная цикла <code>p</code> / <code>i</code> видна только внутри тела.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 22_exercise.kt -->
+            <div class="card" id="file-22">
+                <div class="card-header">
+                    <span class="file-name">22_exercise.kt</span>
+                    <span class="file-title">Упражнение: месяцы и високосный год</span>
+                    <span class="badge">практика</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Практика <code>for</code> по <code>Map</code> с деструктуризацией, использование <code>if</code> внутри объявления Map и полного условия високосного года.
+                </div>
+                <div class="code-block">
+<span class="keyword">val</span> year = <span class="number">2026</span>
+<span class="comment">// Високосный: делится на 4, но не на 100, либо делится на 400</span>
+<span class="keyword">val</span> isLeapYear = year % <span class="number">4</span> == <span class="number">0</span> && (year % <span class="number">100</span> != <span class="number">0</span> || year % <span class="number">400</span> == <span class="number">0</span>)
+
+<span class="keyword">val</span> months = <span class="func">mapOf</span>&lt;<span class="keyword">String</span>, <span class="keyword">Int</span>&gt;(
+    <span class="string">"Jan"</span> <span class="keyword">to</span> <span class="number">31</span>,
+    <span class="string">"Feb"</span> <span class="keyword">to</span> <span class="keyword">if</span> (isLeapYear) <span class="number">29</span> <span class="keyword">else</span> <span class="number">28</span>,
+    <span class="string">"Mar"</span> <span class="keyword">to</span> <span class="number">31</span>,
+    <span class="comment">// ...</span>
+)
+
+<span class="keyword">for</span> ((name, days) <span class="keyword">in</span> months) {
+    <span class="func">println</span>(<span class="string">"$name: $days"</span>)
+}
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li><code>if</code> как выражение возвращает значение для Map.</li>
+                        <li>Деструктуризация <code>for ((name, days) in months)</code> сразу даёт ключ и значение — удобнее, чем <code>month.key</code> / <code>month.value</code>.</li>
+                        <li>Полное условие високосного года: <code>year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)</code>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 23_while.kt -->
+            <div class="card" id="file-23">
+                <div class="card-header">
+                    <span class="file-name">23_while.kt</span>
+                    <span class="file-title">Цикл while и поиск кратных 7</span>
+                    <span class="badge">циклы</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Показать <code>while</code> на примере случайного числа и вывода чисел, кратных 7. Демонстрирует нестандартный шаг цикла через <code>if</code>.
+                </div>
+                <div class="code-block">
+<span class="keyword">val</span> bigNumber = (<span class="number">100</span>..<span class="number">500</span>).<span class="func">random</span>()
+<span class="func">println</span>(<span class="string">"Number: $bigNumber"</span>)
+
+<span class="keyword">var</span> i = <span class="number">1</span>
+<span class="keyword">while</span> (i < bigNumber) {
+    <span class="keyword">if</span> (i % <span class="number">7</span> == <span class="number">0</span>) {
+        <span class="func">println</span>(i)
+        i += <span class="number">7</span>
+    } <span class="keyword">else</span> i++
+}
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li><code>while</code> проверяет условие перед каждой итерацией.</li>
+                        <li><code>(100..500).random()</code> — расширение <code>IntRange</code> для получения случайного числа.</li>
+                        <li>Нестандартный шаг: когда <code>i</code> кратно 7 — увеличиваем сразу на 7, иначе на 1.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 24_functions.kt -->
+            <div class="card" id="file-24">
+                <div class="card-header">
+                    <span class="file-name">24_functions.kt</span>
+                    <span class="file-title">Функции и вычисление площади круга</span>
+                    <span class="badge">функции</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Определение функции с одним выражением, использование глобальной константы и <code>forEach</code> для обработки списка.
+                </div>
+                <div class="code-block">
+<span class="keyword">val</span> pi = <span class="number">3.14159</span>
+
+<span class="keyword">fun</span> <span class="func">getCircleArea</span>(r: <span class="keyword">Int</span>) = pi * r * r
+
+radii.<span class="func">forEach</span> { r: <span class="keyword">Int</span> ->
+    <span class="keyword">val</span> area = <span class="func">getCircleArea</span>(r)
+    <span class="func">println</span>(<span class="string">"Area for circle of radius $r: $area"</span>)
+}
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li>Однострочные функции без блока <code>{}</code> и <code>return</code>.</li>
+                        <li><code>forEach</code> — функция высшего порядка для перебора коллекции (в отличие от <code>map</code>, который возвращает новую коллекцию).</li>
+                        <li><code>pi</code> — свойство верхнего уровня (глобальная константа).</li>
+                        <li>Тип возвращаемого значения выводится автоматически (здесь <code>Double</code>).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 25_more_functions.kt -->
+            <div class="card" id="file-25">
+                <div class="card-header">
+                    <span class="file-name">25_more_functions.kt</span>
+                    <span class="file-title">Перегрузка и vararg</span>
+                    <span class="badge">функции</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Показать две важные возможности: перегрузку функций (одинаковое имя с разными параметрами) и переменное число аргументов <code>vararg</code>.
+                </div>
+                <div class="code-block">
+<span class="keyword">fun</span> <span class="func">multiply</span>(number: <span class="keyword">Int</span>) = number * <span class="number">2</span>
+<span class="keyword">fun</span> <span class="func">multiply</span>(number: <span class="keyword">Int</span>, multiplier: <span class="keyword">Int</span>) = number * multiplier
+
+<span class="keyword">fun</span> <span class="func">sayHi</span>(<span class="keyword">vararg</span> names: <span class="keyword">String</span>) {
+    <span class="keyword">for</span> (name <span class="keyword">in</span> names) {
+        <span class="func">println</span>(<span class="string">"Hi $name"</span>)
+    }
+}
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li>Перегрузка — компилятор выбирает функцию по количеству/типу аргументов.</li>
+                        <li><code>vararg</code> — позволяет передать любое количество аргументов; внутри это массив.</li>
+                        <li>У функции может быть только один <code>vararg</code>, обычно он последний.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 26_lambdas.kt -->
+            <div class="card" id="file-26">
+                <div class="card-header">
+                    <span class="file-name">26_lambdas.kt</span>
+                    <span class="file-title">Лямбды и функции высшего порядка</span>
+                    <span class="badge">функции</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Объяснить, что такое лямбда-выражения и как передавать функции как параметры. Это основа функционального стиля в Kotlin.
+                </div>
+                <div class="code-block">
+<span class="keyword">val</span> lambda = { name: <span class="keyword">String</span> -> <span class="func">println</span>(<span class="string">"Hello $name"</span>) }
+<span class="keyword">val</span> names = <span class="func">listOf</span>(<span class="string">"Thing 1"</span>, <span class="string">"Thing 2"</span>)
+<span class="func">sayHello</span>(names, lambda)
+
+<span class="keyword">fun</span> <span class="func">sayHello</span>(names: <span class="keyword">List</span>&lt;<span class="keyword">String</span>&gt;, doSomething: (<span class="keyword">String</span>) -> <span class="keyword">Unit</span>) {
+    <span class="keyword">for</span> (name <span class="keyword">in</span> names) {
+        <span class="func">doSomething</span>(name)
+    }
+}
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li>Лямбда — анонимная функция в фигурных скобках: <code>{ параметры -> тело }</code>.</li>
+                        <li><code>(String) -> Unit</code> — тип функции: принимает String, ничего не возвращает.</li>
+                        <li><code>Unit</code> в Kotlin — аналог <code>void</code> в Java.</li>
+                        <li>Функции высшего порядка принимают другие функции как аргументы.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 27_classes.kt -->
+            <div class="card" id="file-27">
+                <div class="card-header">
+                    <span class="file-name">27_classes.kt</span>
+                    <span class="file-title">Классы, наследование, open</span>
+                    <span class="badge">ООП</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Введение в классы: свойства, методы, наследование. Ключевое слово <code>open</code> для разрешения наследования.
+                </div>
+                <div class="code-block">
+<span class="keyword">class</span> Car {
+    <span class="keyword">var</span> model: <span class="keyword">String?</span> = <span class="keyword">null</span>
+    <span class="keyword">var</span> topSpeed: <span class="keyword">Int</span> = <span class="number">120</span>
+
+    <span class="keyword">fun</span> <span class="func">start</span>() {
+        <span class="func">println</span>(<span class="string">"Started $model"</span>)
+    }
+}
+
+<span class="keyword">open class</span> Dog { ... }
+<span class="keyword">class</span> Corgi : Dog() { ... }
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li>Классы по умолчанию <code>final</code> — нельзя наследоваться.</li>
+                        <li><code>open</code> снимает это ограничение и позволяет создавать подклассы.</li>
+                        <li>Синтаксис наследования: <code>class Corgi : Dog()</code> — скобки означают вызов конструктора родителя.</li>
+                        <li>Подкласс <code>Corgi</code> получает все методы <code>Dog</code> и добавляет свой <code>strut</code>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 28_class_concepts.kt -->
+            <div class="card" id="file-28">
+                <div class="card-header">
+                    <span class="file-name">28_class_concepts.kt</span>
+                    <span class="file-title">Companion, get/set, init, конструкторы</span>
+                    <span class="badge">ООП</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Продвинутые возможности классов: <code>companion object</code> (статический контекст), кастомные get/set, блок <code>init</code>, множественные конструкторы.
+                </div>
+                <div class="code-block">
+<span class="keyword">class</span> Vehicle {
+    <span class="keyword">companion object</span> {
+        <span class="keyword">fun</span> <span class="func">getInfo</span>() = <span class="string">"This is a car class"</span>
+    }
+
+    <span class="keyword">var</span> topSpeed: <span class="keyword">Int</span>
+        <span class="func">get</span>() = <span class="number">100</span>
+        <span class="func">set</span>(value) { <span class="func">println</span>(<span class="string">"Set new top speed: $value"</span>) }
+
+    <span class="keyword">init</span> {
+        <span class="func">println</span>(<span class="string">"Creating vehicle..."</span>)
+    }
+
+    <span class="keyword">constructor</span>() { ... }
+    <span class="keyword">constructor</span>(newModel: <span class="keyword">String</span>) { ... }
+    <span class="keyword">constructor</span>(newModel: <span class="keyword">String</span>, newSpeed: <span class="keyword">Int</span>) { ... }
+}
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li><code>companion object</code> — аналог статических членов; вызов <code>Vehicle.getInfo()</code> без создания экземпляра.</li>
+                        <li>Кастомные get/set позволяют добавить логику при доступе к свойству (здесь get всегда возвращает 100 — демонстрация).</li>
+                        <li><code>init</code> выполняется сразу после создания объекта, до тела основного конструктора.</li>
+                        <li>Несколько <code>constructor</code> — перегрузка конструкторов с разными наборами параметров.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 29_exercise.kt -->
+            <div class="card" id="file-29">
+                <div class="card-header">
+                    <span class="file-name">29_exercise.kt</span>
+                    <span class="file-title">Упражнение: класс Calculator</span>
+                    <span class="badge">практика</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Комплексное упражнение на классы: свойства, методы, работа с <code>Number</code> и приведение типов.
+                </div>
+                <div class="code-block">
+<span class="keyword">class</span> Calculator {
+    <span class="keyword">var</span> total: <span class="keyword">Double</span> = <span class="number">0.0</span>
+
+    <span class="keyword">fun</span> <span class="func">add</span>(value: <span class="keyword">Number</span>) {
+        <span class="keyword">val</span> valDouble = value.<span class="func">toDouble</span>()
+        <span class="func">print</span>(<span class="string">"${this.total} + $valDouble = "</span>)
+        <span class="keyword">this</span>.total += valDouble
+        <span class="func">println</span>(<span class="keyword">this</span>.total)
+    }
+    <span class="comment">// ... subtract, multiply, divide, reset</span>
+}
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li><code>Number</code> — базовый тип для всех чисел, позволяет принимать <code>Int</code>, <code>Double</code>, <code>Float</code> и т.д.</li>
+                        <li><code>toDouble()</code> — единое приведение к Double для вычислений.</li>
+                        <li><code>this.total</code> — явное обращение к свойству класса.</li>
+                        <li>Метод <code>reset</code> обнуляет счётчик.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 30_interfaces.kt -->
+            <div class="card" id="file-30">
+                <div class="card-header">
+                    <span class="file-name">30_interfaces.kt</span>
+                    <span class="file-title">Интерфейсы и фабрики</span>
+                    <span class="badge">ООП</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Показать интерфейсы как контракт, реализацию по умолчанию, переопределение <code>override</code> и паттерн «фабрика» для создания объектов. Класс может реализовать несколько интерфейсов.
+                </div>
+                <div class="code-block">
+<span class="keyword">interface</span> Oven {
+    <span class="keyword">var</span> temperature: <span class="keyword">Int</span>
+    <span class="keyword">fun</span> <span class="func">turnOn</span>()
+    <span class="keyword">fun</span> <span class="func">turnOff</span>()
+    <span class="keyword">fun</span> <span class="func">cook</span>() {
+        <span class="func">println</span>(<span class="string">"Cooking at Temperature: $temperature"</span>)
+    }
+}
+
+<span class="keyword">class</span> Samsung: Oven {
+    <span class="keyword">override var</span> temperature = <span class="number">500</span>
+    <span class="keyword">override fun</span> <span class="func">turnOn</span>() { <span class="func">println</span>(<span class="string">"Turning on Samsung"</span>) }
+    <span class="keyword">override fun</span> <span class="func">turnOff</span>() { <span class="func">println</span>(<span class="string">"Turning off Samsung"</span>) }
+}
+
+<span class="keyword">fun</span> <span class="func">samsungFactory</span>(): Oven = <span class="func">Samsung</span>()
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li>Интерфейс может содержать абстрактные (<code>turnOn</code>, <code>turnOff</code>) и конкретные (<code>cook</code>) методы.</li>
+                        <li>Свойство <code>temperature</code> только объявлено — значение задаётся в реализующем классе.</li>
+                        <li><code>override</code> обязателен при реализации членов интерфейса.</li>
+                        <li>Фабричная функция возвращает интерфейсный тип, скрывая конкретную реализацию.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 31_exercise.kt -->
+            <div class="card" id="file-31">
+                <div class="card-header">
+                    <span class="file-name">31_exercise.kt</span>
+                    <span class="file-title">Упражнение: интерфейс Coffee и случайный выбор</span>
+                    <span class="badge">практика</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Практика интерфейсов: два класса реализуют <code>Coffee</code>, фабричная функция случайно выбирает сорт. Метод <code>quench</code> имеет реализацию по умолчанию, но переопределяется в классах.
+                </div>
+                <div class="code-block">
+<span class="keyword">interface</span> Coffee {
+    <span class="keyword">var</span> coffeeType: <span class="keyword">String</span>
+
+    <span class="keyword">fun</span> <span class="func">wakeUp</span>() {
+        <span class="func">println</span>(<span class="string">"Waking up!"</span>)
+    }
+
+    <span class="keyword">fun</span> <span class="func">quench</span>() {
+        <span class="func">println</span>(<span class="string">"Ahh, thirst quenched!"</span>)
+    }
+}
+
+<span class="keyword">class</span> Arabica: Coffee {
+    <span class="keyword">override var</span> coffeeType: <span class="keyword">String</span> = <span class="string">"Arabica"</span>
+    <span class="keyword">override fun</span> <span class="func">quench</span>() {
+        <span class="func">println</span>(<span class="string">"Thirst quenched with $coffeeType"</span>)
+    }
+}
+
+<span class="keyword">fun</span> <span class="func">orderCoffee</span>(): Coffee {
+    <span class="keyword">val</span> choice = (<span class="number">0</span>..<span class="number">1</span>).<span class="func">random</span>()
+    <span class="keyword">return if</span> (choice == <span class="number">1</span>) <span class="func">Arabica</span>() <span class="keyword">else</span> <span class="func">Robusta</span>()
+}
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li><code>quench</code> имеет реализацию по умолчанию, но в классах переопределяется — это демонстрация полиморфизма.</li>
+                        <li>Фабрика использует <code>random()</code> для случайного выбора сорта.</li>
+                        <li>Возвращается тип интерфейса — клиент не знает о конкретном классе.</li>
+                        <li><code>wakeUp()</code> не переопределяется, используется реализация из интерфейса.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 32_generics.kt -->
+            <div class="card" id="file-32">
+                <div class="card-header">
+                    <span class="file-name">32_generics.kt</span>
+                    <span class="file-title">Обобщённый класс Bike&lt;T&gt;</span>
+                    <span class="badge">generics</span>
+                </div>
+                <div class="why">
+                    <strong>Зачем:</strong> Введение в обобщения (generics): класс с параметром типа, который может хранить и отображать значение любого типа.
+                </div>
+                <div class="code-block">
+<span class="keyword">class</span> Bike&lt;T&gt; {
+    <span class="keyword">fun</span> <span class="func">display</span>(value: T) {
+        <span class="func">println</span>(value.<span class="func">toString</span>())
+    }
+}
+
+<span class="keyword">fun</span> <span class="func">main</span>() {
+    <span class="keyword">val</span> bike = <span class="func">Bike</span>&lt;<span class="keyword">Int</span>&gt;()
+    bike.<span class="func">display</span>(<span class="number">100</span>)
+}
+                </div>
+                <div class="explain">
+                    <ul>
+                        <li><code>Bike&lt;T&gt;</code> — параметризованный тип, <code>T</code> — параметр типа.</li>
+                        <li>При создании указывается конкретный тип: <code>Bike&lt;Int&gt;</code>.</li>
+                        <li>Метод <code>display</code> принимает значение типа <code>T</code>.</li>
+                        <li>Generics обеспечивают типобезопасность и переиспользование кода.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <hr>
+
+        <div class="note">
+            <strong>📘 Общий контекст проекта:</strong> Это учебный проект <code>kotlin-intro</code>. Все файлы находятся в пакете <code>section2</code>. Сборка настроена через Gradle с Kotlin 2.4.20 (в <code>libs.versions.toml</code>) и <code>mainClass</code>, указывающим на <code>section2.HelloWorld</code> (благодаря аннотации <code>@JvmName</code> в <code>01_hw.kt</code>). В <code>settings.gradle.kts</code> версия плагина Kotlin больше не дублируется — она берётся только из version catalog. Файл <code>local.properties</code> содержит путь к Android SDK — это не часть Kotlin-кода, а конфигурация среды.
+        </div>
+
+        <div class="footer">
+            Туториал сгенерирован на основе анализа repomix-output.xml (обновлённая версия) · Kotlin Intro · раздел section2
+        </div>
+    </main>
+
+</div>
+
+<a href="#" class="to-top" id="toTop" aria-label="Наверх">↑</a>
+
+<script>
+    (function() {
+        const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.getElementById('menuToggle');
+        const overlay = document.getElementById('overlay');
+        const toTop = document.getElementById('toTop');
+        const navLinks = document.querySelectorAll('.nav-list a');
+        const cards = document.querySelectorAll('.card');
+
+        function closeMenu() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+        }
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+        });
+
+        overlay.addEventListener('click', closeMenu);
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 400) {
+                toTop.classList.add('visible');
+            } else {
+                toTop.classList.remove('visible');
+            }
+            updateActiveLink();
+        });
+
+        toTop.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        function updateActiveLink() {
+            let currentId = '';
+            const scrollPos = window.scrollY + 120;
+
+            cards.forEach(card => {
+                if (card.offsetTop <= scrollPos) {
+                    currentId = card.id;
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + currentId) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 960) {
+                    closeMenu();
+                }
+            });
+        });
+
+        updateActiveLink();
+    })();
+</script>
+
+</body>
+</html>
