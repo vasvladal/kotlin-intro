@@ -34,3 +34,4 @@ bin/
 .gradle/
 build/
 gradle/wrapper/gradle-wrapper.jar
+repomix-output.xml
