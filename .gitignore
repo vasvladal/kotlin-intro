@@ -35,3 +35,4 @@ bin/
 build/
 gradle/wrapper/gradle-wrapper.jar
 repomix-output.xml
+local.properties
